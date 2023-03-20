@@ -1,0 +1,8 @@
+com\manager\demo\classloder\PluginLoader.class
+com\manager\demo\ioc\PluginManger.class
+PluginEnv\PluginConfig.class
+com\manager\demo\scan\PluginListenner.class
+com\manager\demo\PluginMarTemplate.class
+com\manager\demo\scan\PluginMonitor.class
+com\manager\demo\collections\PluginStoreMap.class
+com\manager\demo\access\PluginMan.class
