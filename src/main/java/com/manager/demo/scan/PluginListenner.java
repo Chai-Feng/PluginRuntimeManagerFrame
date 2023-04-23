@@ -1,4 +1,5 @@
 package com.manager.demo.scan;
+
 import PluginEnv.PluginInfo;
 import com.manager.demo.PluginMarTemplate;
 import com.manager.demo.collections.PluginStoreMap;
@@ -27,9 +28,9 @@ public class PluginListenner extends FileAlterationListenerAdaptor {
 
     private static PluginInfo pluginInfo;
 
-    private  static  String pluginPath;
+    private static String pluginPath;
 
-    private static List<URL> urls =new ArrayList<>();
+    private static List<URL> urls = new ArrayList<>();
 
 
     public PluginListenner(GenericApplicationContext context) {
@@ -54,61 +55,60 @@ public class PluginListenner extends FileAlterationListenerAdaptor {
         String name = file.getName();
         String path = file.getPath();
 
-         String[] pathNames = path.split("\\"+file.separator);
+        String[] pathNames = path.split("\\" + file.separator);
 
         //补充解压、从yaml中获取配置
-        if(name.endsWith("yaml")){
-            log.info("找到了yaml {}",name);
+        if (name.endsWith("yaml")) {
+            log.info("找到了yaml {}", name);
             pluginInfo = getPluginInfo(path);
-        } else if (name.endsWith("jar")){
+        } else if (name.endsWith("jar")) {
             try {
                 URL url = new File(path).toURI().toURL();
                 urls.add(url);
-                System.out.println("记录扫描到的url "+url);
-                System.out.println("LIst<url> size = "+urls.size());
+                System.out.println("记录扫描到的url " + url);
+                System.out.println("LIst<url> size = " + urls.size());
             } catch (MalformedURLException e) {
                 throw new RuntimeException(e);
             }
-            if(pathNames[pathNames.length-2].equalsIgnoreCase(name.split("\\.jar")[0])) {
+            if (pathNames[pathNames.length - 2].equalsIgnoreCase(name.split("\\.jar")[0])) {
                 //记录路径
 
-                log.info("找到了插件 {}",path);
+                log.info("找到了插件 {}", path);
                 //校验1： 通过路径最后一个文件夹名称与jar包对比，不存在yaml和jar先后顺序问题
-                pluginPath=path;
+                pluginPath = path;
             }
         }
-        if( pluginInfo!=null&&pluginPath!=null&&urls.size()==9){
-           log.info("插件名 {}, 路径{}",pluginInfo.pluginName,pluginPath);
-            PluginManger pluginManger = new PluginManger(rootContext,urls);
+        if (pluginInfo != null && pluginPath != null && urls.size() == 9) {
+            log.info("插件名 {}, 路径{}", pluginInfo.pluginName, pluginPath);
+            PluginManger pluginManger = new PluginManger(rootContext, urls);
             GenericApplicationContext ctx = pluginManger.doStart(pluginInfo.basePackage, pluginInfo.pluginName, pluginPath);
-            pluginManger.doExectue(ctx,pluginInfo.pluginName);
+            pluginManger.doExectue(ctx, pluginInfo.pluginName);
 
 
-            pluginInfo=null;
-            pluginPath=null;
+            pluginInfo = null;
+            pluginPath = null;
             urls.stream().forEach(System.out::println);
             urls.clear();
         }
         log.info("插件保存Map {}", PluginStoreMap.pluginMap);
 
 
-
     }
 
     //加载插件配置信息
-    private PluginInfo getPluginInfo(String fileName){
-        FileInputStream fileInputStream =null;
-        try{
+    private PluginInfo getPluginInfo(String fileName) {
+        FileInputStream fileInputStream = null;
+        try {
             Constructor constructor = new Constructor(PluginInfo.class);
             Yaml yaml = new Yaml(constructor);
-             fileInputStream = new FileInputStream(fileName);
-       
+            fileInputStream = new FileInputStream(fileName);
+
             PluginInfo info = yaml.load(fileInputStream);
             return info;
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } finally {
-            if(fileInputStream!=null){
+            if (fileInputStream != null) {
                 try {
                     fileInputStream.close();
                 } catch (IOException e) {
@@ -132,7 +132,7 @@ public class PluginListenner extends FileAlterationListenerAdaptor {
     public void onFileDelete(File file) {
         String name = file.getName();
         String path = file.getPath();
-        if (name.endsWith(".jar")||name.endsWith(".yaml")) {
+        if (name.endsWith(".jar") || name.endsWith(".yaml")) {
             log.info("插件被删除");
         }
     }

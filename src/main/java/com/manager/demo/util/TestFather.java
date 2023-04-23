@@ -7,11 +7,13 @@ package com.manager.demo.util;
  * @Date: 2023/4/22 14:11
  */
 public class TestFather {
-    static String st ="静态变量测试";
-    String sv="普通变量";
+    static String st = "静态变量测试";
+    String sv = "普通变量";
+
     static {
         System.out.println("我是静态代码块");
     }
+
     public static void main(String[] args) {
         new Son().printDetil();
         System.out.println();
@@ -21,39 +23,39 @@ public class TestFather {
 //        new Father().printDetil();
     }
 
-    public void sayHello(){
+    public void sayHello() {
         System.out.println("hello!!~~~~");
     }
 
 }
 
 
+class Father extends GranPa {
 
-class Father extends GranPa{
-
-    public void printDetil(){
+    public void printDetil() {
         System.out.println("123456");
     }
 }
 
-class Son extends Father{
+class Son extends Father {
 
 
-    public void printDetil(){
+    public void printDetil() {
         super.printDetil();
         super.yeye();
-        System.out.println("this --- "+this.getClass().getName());
+        System.out.println("this --- " + this.getClass().getName());
         //Class<? extends Son> aClass = this.getClass();
-        System.out.println("super --- "+ this.getClass().getSuperclass());
+        System.out.println("super --- " + this.getClass().getSuperclass());
     }
 }
 
-class GranPa{
+class GranPa {
 
-    public void yeye(){
+    public void yeye() {
         System.out.println("我是 嫩爷爷");
     }
-    public void printDetil(){
+
+    public void printDetil() {
         System.out.println("爷爷的123456");
     }
 }
