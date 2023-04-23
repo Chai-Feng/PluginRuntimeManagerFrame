@@ -33,5 +33,4 @@ public class PluginMonitor {
         log.info("插件监视器关闭");
         monitor.stop();
     }
-
 }

@@ -1,4 +1,5 @@
 package com.manager.demo.access;
+
 import lombok.Data;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -14,6 +15,7 @@ import org.apache.logging.log4j.core.config.AppenderRef;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.filter.ThresholdFilter;
+import org.apache.logging.log4j.core.impl.Log4jContextFactory;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.springframework.stereotype.Component;
 
@@ -25,16 +27,14 @@ import java.nio.charset.Charset;
  */
 
 @Data
-@Component("pluginMan")
+@Component("sentinel")
 public class PluginMan {
 
-    private int id;
+
     private String logPath;
 
-    private  LoggerContext ctx;
 
-    public PluginMan(int id, String logPath, String pluginName) {
-        this.id = id;
+    public PluginMan(String logPath, String pluginName) {
         this.logPath = logPath;
         this.pluginName = pluginName;
     }
@@ -47,9 +47,17 @@ public class PluginMan {
     public PluginMan() {
     }
 
+    public Logger getLogger(String name) {
+
+        Logger logger = loggerContext.getLogger(name);
+
+        return logger;
+    }
+
     public void logHepler() {
-        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-        Configuration configuration = ctx.getConfiguration();
+        // LogManager.setFactory(new Log4jContextFactory());
+        loggerContext = (LoggerContext) LogManager.getContext(false);
+        Configuration configuration = loggerContext.getConfiguration();
 
         PatternLayout.Builder layoutBuilder = PatternLayout.newBuilder();
         layoutBuilder.withPattern("%d{yyyy-MM-dd hh:mm:ss.SSS} %-5level %class{36} %L %M - %msg%xEx%n");
@@ -61,8 +69,8 @@ public class PluginMan {
         ThresholdFilter thresholdFilter = ThresholdFilter.createFilter(Level.INFO, Filter.Result.ACCEPT, Filter.Result.DENY);
         RollingRandomAccessFileAppender randomAccessFileAppender = RollingRandomAccessFileAppender.newBuilder()
                 .setName(pluginName)
-                .withFileName(logPath+"/"+pluginName+"/"+pluginName+".log")
-                .withFilePattern(logPath+"/%d{yyyy-MM-dd}/abc_test.log")
+                .withFileName(logPath + "/" + pluginName + "/" + pluginName + ".log")
+                .withFilePattern(logPath + "/%d{yyyy-MM-dd}/abc_test.log")
                 .withImmediateFlush(true)
                 .withPolicy(timeBasedTriggeringPolicy)
                 .setFilter(thresholdFilter)
@@ -75,21 +83,18 @@ public class PluginMan {
 
         AppenderRef[] refs = new AppenderRef[]{ref};
         //能看见控制台打印  additivtiy =false
-       // LoggerConfig loggerConfig = AsyncLoggerConfig.createLogger(false, Level.INFO, pluginName+"Logger", "false", refs, null, configuration, null);
+        // LoggerConfig loggerConfig = AsyncLoggerConfig.createLogger(false, Level.INFO, pluginName+"Logger", "false", refs, null, configuration, null);
 
-        LoggerConfig loggerConfig = AsyncLoggerConfig.createLogger(true, Level.INFO, pluginName+"Logger", "false", refs, null, configuration, null);
+        LoggerConfig loggerConfig = AsyncLoggerConfig.createLogger(true, Level.INFO, pluginName, "false", refs, null, configuration, null);
 
         loggerConfig.addAppender(randomAccessFileAppender, Level.TRACE, null);
 
-        configuration.addLogger(pluginName+"_logger", loggerConfig);
+        configuration.addLogger(pluginName, loggerConfig);
         configuration.start();
 
-        ctx.updateLoggers();
-        Logger logger = ctx.getLogger(pluginName + "_logger");
-        logger.log(Level.INFO,"插件"+pluginName+" \t日志开启");
-
-        this.ctx=ctx;
-
+        loggerContext.updateLoggers();
+        Logger logger = loggerContext.getLogger(pluginName);
+        logger.log(Level.INFO, "插件" + pluginName + " \t日志开启");
 
     }
 }
